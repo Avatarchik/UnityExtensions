@@ -246,6 +246,7 @@ namespace UnityExtension.Editor
 
     public struct HandlesGUIScope : IDisposable
     {
+        // 因为 C# 暂时不能自定义或移除 struct 的无参构造，导致我们必须添加一个无用的参数 :/
         public HandlesGUIScope(int useless)
         {
             Handles.BeginGUI();
@@ -260,7 +261,7 @@ namespace UnityExtension.Editor
 
     public struct HorizontalLayoutScope : IDisposable
     {
-        // 因为 C# 不能自定义或移除 struct 的无参构造，导致我们必须添加一个无用的参数 :/
+        // 因为 C# 暂时不能自定义或移除 struct 的无参构造，导致我们必须添加一个无用的参数 :/
         public HorizontalLayoutScope(int useless)
         {
             EditorGUILayout.BeginHorizontal();
@@ -285,7 +286,7 @@ namespace UnityExtension.Editor
 
     public struct VerticalLayoutScope : IDisposable
     {
-        // 因为 C# 不能自定义或移除 struct 的无参构造，导致我们必须添加一个无用的参数 :/
+        // 因为 C# 暂时不能自定义或移除 struct 的无参构造，导致我们必须添加一个无用的参数 :/
         public VerticalLayoutScope(int useless)
         {
             EditorGUILayout.BeginVertical();

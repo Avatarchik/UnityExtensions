@@ -5,17 +5,22 @@ namespace UnityExtension.Editor
 {
     class MeasuringWindow : EditorWindow
     {
-        static Transform _startTrans;
-        static Vector3 _startPos;
-        static Transform _endTrans;
-        static Vector3 _endPos = new Vector3(1, 1, 1);
+        class Data : EditorScriptableSingleton<Data>
+        {
+            public Transform startTrans;
+            public Vector3 startPos;
+            public Transform endTrans;
+            public Vector3 endPos = new Vector3(2, 3, 4);
 
-        static bool _showXYZ = true;
-        static bool _showYZ;
-        static bool _showXZ;
-        static bool _showXY;
+            public bool showXYZ = true;
+            public bool showYZ;
+            public bool showXZ;
+            public bool showXY;
+            
+            public bool showMoveTools = true;
+        }
 
-        static bool _showMoveTools = true;
+        Data d;
 
 
         [MenuItem("Window/Unity Extension/Measuring")]
@@ -30,6 +35,7 @@ namespace UnityExtension.Editor
 
         void OnEnable()
         {
+            d = Data.instance;
             SceneView.onSceneGUIDelegate += OnSceneGUI;
         }
 
@@ -46,58 +52,76 @@ namespace UnityExtension.Editor
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Start", EditorStyles.boldLabel);
 
-            var rect = EditorGUILayout.GetControlRect();
-            rect.width -= 8 + rect.height * 3;
-            _startTrans = EditorGUI.ObjectField(rect, GUIContent.none, _startTrans, typeof(Transform), true) as Transform;
-
-            rect.x = rect.xMax + 8;
-            rect.width = rect.height * 1.5f;
-            if (GUI.Button(rect, EditorUtilities.TempContent("S", null, "Use selection"), EditorStyles.miniButtonLeft)) _startTrans = Selection.activeTransform;
-
-            rect.x = rect.xMax;
-            if (GUI.Button(rect, EditorUtilities.TempContent("C", null, "Clear reference"), EditorStyles.miniButtonRight)) _startTrans = null;
-
-            if (_startTrans)
+            using (var scope = new ChangeCheckScope(d))
             {
-                using (var scope = new ChangeCheckScope(_startTrans))
+                var rect = EditorGUILayout.GetControlRect();
+                rect.width -= 8 + rect.height * 3;
+                var startTrans = EditorGUI.ObjectField(rect, GUIContent.none, d.startTrans, typeof(Transform), true) as Transform;
+
+                rect.x = rect.xMax + 8;
+                rect.width = rect.height * 1.5f;
+                if (GUI.Button(rect, EditorUtilities.TempContent("S", null, "Use selection"), EditorStyles.miniButtonLeft)) startTrans = Selection.activeTransform;
+
+                rect.x = rect.xMax;
+                if (GUI.Button(rect, EditorUtilities.TempContent("C", null, "Clear reference"), EditorStyles.miniButtonRight)) startTrans = null;
+
+                if (scope.changed) d.startTrans = startTrans;
+            }
+
+            if (d.startTrans)
+            {
+                using (var scope = new ChangeCheckScope(d.startTrans))
                 {
-                    _startPos = EditorGUILayout.Vector3Field(GUIContent.none, _startTrans.position);
-                    if (scope.changed) _startTrans.position = _startPos;
+                    d.startPos = EditorGUILayout.Vector3Field(GUIContent.none, d.startTrans.position);
+                    if (scope.changed) d.startTrans.position = d.startPos;
                 }
             }
             else
             {
-                _startPos = EditorGUILayout.Vector3Field(GUIContent.none, _startPos);
+                using (var scope = new ChangeCheckScope(d))
+                {
+                    var startPos = EditorGUILayout.Vector3Field(GUIContent.none, d.startPos);
+                    if (scope.changed) d.startPos = startPos;
+                }
             }
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("End", EditorStyles.boldLabel);
 
-            rect = EditorGUILayout.GetControlRect();
-            rect.width -= 8 + rect.height * 3;
-            _endTrans = EditorGUI.ObjectField(rect, GUIContent.none, _endTrans, typeof(Transform), true) as Transform;
-
-            rect.x = rect.xMax + 8;
-            rect.width = rect.height * 1.5f;
-            if (GUI.Button(rect, EditorUtilities.TempContent("S", null, "Use selection"), EditorStyles.miniButtonLeft)) _endTrans = Selection.activeTransform;
-
-            rect.x = rect.xMax;
-            if (GUI.Button(rect, EditorUtilities.TempContent("C", null, "Clear reference"), EditorStyles.miniButtonRight)) _endTrans = null;
-
-            if (_endTrans)
+            using (var scope = new ChangeCheckScope(d))
             {
-                using (var scope = new ChangeCheckScope(_endTrans))
+                var rect = EditorGUILayout.GetControlRect();
+                rect.width -= 8 + rect.height * 3;
+                var endTrans = EditorGUI.ObjectField(rect, GUIContent.none, d.endTrans, typeof(Transform), true) as Transform;
+
+                rect.x = rect.xMax + 8;
+                rect.width = rect.height * 1.5f;
+                if (GUI.Button(rect, EditorUtilities.TempContent("S", null, "Use selection"), EditorStyles.miniButtonLeft)) endTrans = Selection.activeTransform;
+
+                rect.x = rect.xMax;
+                if (GUI.Button(rect, EditorUtilities.TempContent("C", null, "Clear reference"), EditorStyles.miniButtonRight)) endTrans = null;
+
+                if (scope.changed) d.endTrans = endTrans;
+            }
+
+            if (d.endTrans)
+            {
+                using (var scope = new ChangeCheckScope(d.endTrans))
                 {
-                    _endPos = EditorGUILayout.Vector3Field(GUIContent.none, _endTrans.position);
-                    if (scope.changed) _endTrans.position = _endPos;
+                    d.endPos = EditorGUILayout.Vector3Field(GUIContent.none, d.endTrans.position);
+                    if (scope.changed) d.endTrans.position = d.endPos;
                 }
             }
             else
             {
-                _endPos = EditorGUILayout.Vector3Field(GUIContent.none, _endPos);
+                using (var scope = new ChangeCheckScope(d))
+                {
+                    var endPos = EditorGUILayout.Vector3Field(GUIContent.none, d.endPos);
+                    if (scope.changed) d.endPos = endPos;
+                }
             }
 
-            Vector3 distance = _endPos - _startPos;
+            Vector3 distance = d.endPos - d.startPos;
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Distance", EditorStyles.boldLabel);
@@ -130,102 +154,139 @@ namespace UnityExtension.Editor
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Visualization", EditorStyles.boldLabel);
-            _showXYZ = GUILayout.Toggle(_showXYZ, "Show XYZ 3D", EditorStyles.miniButton);
-            _showYZ = GUILayout.Toggle(_showYZ, "Show YZ Plane", EditorStyles.miniButton);
-            _showXZ = GUILayout.Toggle(_showXZ, "Show XZ Plane", EditorStyles.miniButton);
-            _showXY = GUILayout.Toggle(_showXY, "Show XY Plane", EditorStyles.miniButton);
+            d.showXYZ = GUILayout.Toggle(d.showXYZ, "Show XYZ 3D", EditorStyles.miniButton);
+            d.showYZ = GUILayout.Toggle(d.showYZ, "Show YZ Plane", EditorStyles.miniButton);
+            d.showXZ = GUILayout.Toggle(d.showXZ, "Show XZ Plane", EditorStyles.miniButton);
+            d.showXY = GUILayout.Toggle(d.showXY, "Show XY Plane", EditorStyles.miniButton);
             EditorGUILayout.Space();
-            _showMoveTools = GUILayout.Toggle(_showMoveTools, "Show Move Tools", EditorStyles.miniButton);
+            d.showMoveTools = GUILayout.Toggle(d.showMoveTools, "Show Move Tools", EditorStyles.miniButton);
             Tools.hidden = !GUILayout.Toggle(!Tools.hidden, "Show Unity Tools", EditorStyles.miniButton);
         }
 
 
         void OnSceneGUI(SceneView scene)
         {
-            if (_showMoveTools)
+            if (d.showMoveTools)
             {
-                if (_startTrans)
+                if (d.startTrans)
                 {
-                    using (var scope = new ChangeCheckScope(_startTrans))
+                    using (var scope = new ChangeCheckScope(d.startTrans))
                     {
-                        _startPos = Handles.PositionHandle(_startTrans.position, Tools.pivotRotation == PivotRotation.Local ? _startTrans.rotation : Quaternion.identity);
-                        if (scope.changed) _startTrans.position = _startPos;
+                        d.startPos = Handles.PositionHandle(d.startTrans.position, Tools.pivotRotation == PivotRotation.Local ? d.startTrans.rotation : Quaternion.identity);
+                        if (scope.changed) d.startTrans.position = d.startPos;
                     }
                 }
                 else
                 {
-                    using (var scope = new ChangeCheckScope(null))
+                    using (var scope = new ChangeCheckScope(d))
                     {
-                        _startPos = Handles.PositionHandle(_startPos, Quaternion.identity);
-                        if (scope.changed) Repaint();
+                        var startPos = Handles.PositionHandle(d.startPos, Quaternion.identity);
+                        if (scope.changed)
+                        {
+                            d.startPos = startPos;
+                            Repaint();
+                        }
                     }
                 }
 
-                if (_endTrans)
+                if (d.endTrans)
                 {
-                    using (var scope = new ChangeCheckScope(_endTrans))
+                    using (var scope = new ChangeCheckScope(d.endTrans))
                     {
-                        _endPos = Handles.PositionHandle(_endTrans.position, Tools.pivotRotation == PivotRotation.Local ? _endTrans.rotation : Quaternion.identity);
-                        if (scope.changed) _endTrans.position = _endPos;
+                        d.endPos = Handles.PositionHandle(d.endTrans.position, Tools.pivotRotation == PivotRotation.Local ? d.endTrans.rotation : Quaternion.identity);
+                        if (scope.changed) d.endTrans.position = d.endPos;
                     }
                 }
                 else
                 {
-                    using (var scope = new ChangeCheckScope(null))
+                    using (var scope = new ChangeCheckScope(d))
                     {
-                        _endPos = Handles.PositionHandle(_endPos, Quaternion.identity);
-                        if (scope.changed) Repaint();
+                        var endPos = Handles.PositionHandle(d.endPos, Quaternion.identity);
+                        if (scope.changed)
+                        {
+                            d.endPos = endPos;
+                            Repaint();
+                        }
                     }
                 }
             }
 
-            Vector3 distance = _endPos - _startPos;
+            Vector3 distance = d.endPos - d.startPos;
             Vector3 temp;
+            float length;
 
-            if (_showYZ)
+            if (d.showYZ)
             {
-                temp = new Vector3(_endPos.x, _startPos.y, _startPos.z);
+                temp = new Vector3(d.endPos.x, d.startPos.y, d.startPos.z);
 
-                GUI.contentColor = Handles.color = new Color(1f, 0.4f, 0.4f);
-                Handles.DrawLine(_startPos, temp);
-                Handles.Label((_startPos + temp) * 0.5f, "X: " + Mathf.Abs(distance.x).ToString(), EditorStyles.whiteBoldLabel);
+                length = Mathf.Abs(distance.x);
+                if (length > Mathf.Epsilon)
+                {
+                    GUI.contentColor = Handles.color = new Color(1f, 0.4f, 0.4f);
+                    Handles.DrawLine(d.startPos, temp);
+                    Handles.Label((d.startPos + temp) * 0.5f, "X: " + length, EditorStyles.whiteBoldLabel);
+                }
 
-                GUI.contentColor = Handles.color = new Color(0.3f, 0.9f, 0.9f);
-                Handles.DrawLine(_endPos, temp);
-                Handles.Label((_endPos + temp) * 0.5f, "YZ: " + distance.yz().magnitude.ToString(), EditorStyles.whiteBoldLabel);
+                length = distance.yz().magnitude;
+                if (length > Mathf.Epsilon)
+                {
+                    GUI.contentColor = Handles.color = new Color(0.3f, 0.9f, 0.9f);
+                    Handles.DrawLine(d.endPos, temp);
+                    Handles.Label((d.endPos + temp) * 0.5f, "YZ: " + length, EditorStyles.whiteBoldLabel);
+                }
             }
 
-            if (_showXZ)
+            if (d.showXZ)
             {
-                temp = new Vector3(_startPos.x, _endPos.y, _startPos.z);
+                temp = new Vector3(d.startPos.x, d.endPos.y, d.startPos.z);
 
-                GUI.contentColor = Handles.color = new Color(0.4f, 0.9f, 0.4f);
-                Handles.DrawLine(_startPos, temp);
-                Handles.Label((_startPos + temp) * 0.5f, "Y: " + Mathf.Abs(distance.y).ToString(), EditorStyles.whiteBoldLabel);
+                length = Mathf.Abs(distance.y);
+                if (length > Mathf.Epsilon)
+                {
+                    GUI.contentColor = Handles.color = new Color(0.4f, 0.9f, 0.4f);
+                    Handles.DrawLine(d.startPos, temp);
+                    Handles.Label((d.startPos + temp) * 0.5f, "Y: " + length, EditorStyles.whiteBoldLabel);
+                }
 
-                GUI.contentColor = Handles.color = new Color(1f, 0.4f, 1f);
-                Handles.DrawLine(_endPos, temp);
-                Handles.Label((_endPos + temp) * 0.5f, "XZ: " + distance.xz().magnitude.ToString(), EditorStyles.whiteBoldLabel);
+                length = distance.xz().magnitude;
+                if (length > Mathf.Epsilon)
+                {
+                    GUI.contentColor = Handles.color = new Color(1f, 0.4f, 1f);
+                    Handles.DrawLine(d.endPos, temp);
+                    Handles.Label((d.endPos + temp) * 0.5f, "XZ: " + length, EditorStyles.whiteBoldLabel);
+                }
             }
 
-            if (_showXY)
+            if (d.showXY)
             {
-                temp = new Vector3(_startPos.x, _startPos.y, _endPos.z);
+                temp = new Vector3(d.startPos.x, d.startPos.y, d.endPos.z);
 
-                GUI.contentColor = Handles.color = new Color(0.4f, 0.7f, 1f);
-                Handles.DrawLine(_startPos, temp);
-                Handles.Label((_startPos + temp) * 0.5f, "Z: " + Mathf.Abs(distance.z).ToString(), EditorStyles.whiteBoldLabel);
+                length = Mathf.Abs(distance.z);
+                if (length > Mathf.Epsilon)
+                {
+                    GUI.contentColor = Handles.color = new Color(0.4f, 0.7f, 1f);
+                    Handles.DrawLine(d.startPos, temp);
+                    Handles.Label((d.startPos + temp) * 0.5f, "Z: " + length, EditorStyles.whiteBoldLabel);
+                }
 
-                GUI.contentColor = Handles.color = new Color(0.85f, 0.85f, 0.3f);
-                Handles.DrawLine(_endPos, temp);
-                Handles.Label((_endPos + temp) * 0.5f, "XY: " + distance.xy().magnitude.ToString(), EditorStyles.whiteBoldLabel);
+                length = distance.xy().magnitude;
+                if (length > Mathf.Epsilon)
+                {
+                    GUI.contentColor = Handles.color = new Color(0.85f, 0.85f, 0.3f);
+                    Handles.DrawLine(d.endPos, temp);
+                    Handles.Label((d.endPos + temp) * 0.5f, "XY: " + length, EditorStyles.whiteBoldLabel);
+                }
             }
 
-            if (_showXYZ)
+            if (d.showXYZ)
             {
-                GUI.contentColor = Handles.color = Color.white;
-                Handles.DrawLine(_startPos, _endPos);
-                Handles.Label((_startPos + _endPos) * 0.5f, "XYZ: " + distance.magnitude.ToString(), EditorStyles.whiteBoldLabel);
+                length = distance.magnitude;
+                if (length > Mathf.Epsilon)
+                {
+                    GUI.contentColor = Handles.color = Color.white;
+                    Handles.DrawLine(d.startPos, d.endPos);
+                    Handles.Label((d.startPos + d.endPos) * 0.5f, "XYZ: " + length, EditorStyles.whiteBoldLabel);
+                }
             }
         }
 
