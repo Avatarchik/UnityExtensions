@@ -136,9 +136,22 @@ namespace UnityExtension
             if (_first == id) _first = node.next;
             if (_last == id) _last = node.previous;
 
-            node.previous = node.next = -1;
-            node.value = default;
+            if (node.previous != -1)
+            {
+                Node tmp = _list[node.previous];
+                tmp.next = node.next;
+                _list[node.previous] = tmp;
+                node.previous = -1;
+            }
+            if (node.next != -1)
+            {
+                Node tmp = _list[node.next];
+                tmp.previous = node.previous;
+                _list[node.next] = tmp;
+                node.next = -1;
+            }
 
+            node.value = default;
             _list[id] = node;
             _emptyIds.Push(id);
         }
@@ -151,9 +164,18 @@ namespace UnityExtension
         public int AddFirst(T value)
         {
             var node = new Node { previous = -1, next = _first, value = value };
-            _first = Add(ref node);
-            if (_last == -1) _last = _first;
-            return _first;
+            int newId = Add(ref node);
+
+            if (_first == -1) _last = newId;
+            else
+            {
+                var tmp = _list[_first];
+                tmp.previous = newId;
+                _list[_first] = tmp;
+            }
+            _first = newId;
+
+            return newId;
         }
 
 
@@ -164,8 +186,17 @@ namespace UnityExtension
         public int AddLast(T value)
         {
             var node = new Node { previous = _last, next = -1, value = value };
-            _last = Add(ref node);
-            if (_first == -1) _first = _last;
+            int newId = Add(ref node);
+
+            if (_first == -1) _first = newId;
+            else
+            {
+                var tmp = _list[_last];
+                tmp.next = newId;
+                _list[_last] = tmp;
+            }
+            _last = newId;
+
             return _last;
         }
 
@@ -176,17 +207,27 @@ namespace UnityExtension
         /// <returns> id </returns>
         public int AddAfter(int id, T value)
         {
-            var node = _list[id];
-            if (node.previous == node.next && _first != id)
+            var prevNode = _list[id];
+            if (prevNode.previous == prevNode.next && _first != id)
             {
                 throw new Exception("invalid id");
             }
 
-            node.previous = id;
-            node.value = value;
-
+            var node = new Node { previous = id, next = prevNode.next, value = value };
             int newId = Add(ref node);
-            if (_last == id) _last = newId;
+
+            if (prevNode.next == -1)
+            {
+                _last = newId;
+            }
+            else
+            {
+                var tmp = _list[prevNode.next];
+                tmp.previous = newId;
+                _list[prevNode.next] = tmp;
+            }
+            prevNode.next = newId;
+            _list[id] = prevNode;
 
             return newId;
         }
@@ -198,17 +239,27 @@ namespace UnityExtension
         /// <returns> id </returns>
         public int AddBefore(int id, T value)
         {
-            var node = _list[id];
-            if (node.previous == node.next && _first != id)
+            var nextNode = _list[id];
+            if (nextNode.previous == nextNode.next && _first != id)
             {
                 throw new Exception("invalid id");
             }
 
-            node.next = id;
-            node.value = value;
-
+            var node = new Node { previous = nextNode.previous, next = id, value = value };
             int newId = Add(ref node);
-            if (_first == id) _first = newId;
+
+            if (nextNode.previous == -1)
+            {
+                _first = newId;
+            }
+            else
+            {
+                var tmp = _list[nextNode.previous];
+                tmp.next = newId;
+                _list[nextNode.previous] = tmp;
+            }
+            nextNode.previous = newId;
+            _list[id] = nextNode;
 
             return newId;
         }

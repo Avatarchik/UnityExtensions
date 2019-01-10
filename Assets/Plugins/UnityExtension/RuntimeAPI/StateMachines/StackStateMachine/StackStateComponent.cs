@@ -5,9 +5,21 @@ using UnityEngine.Events;
 namespace UnityExtension
 {
     /// <summary>
+    /// 栈状态组件基类
+    /// </summary>
+    public abstract class BaseStackStateComponent : ScriptableComponent, IStackState
+    {
+        public abstract void OnEnter(StackAction stackAction);
+        public abstract void OnExit(StackAction stackAction);
+        public abstract void OnUpdate(float deltaTime);
+    }
+
+
+    /// <summary>
     /// 栈状态组件. 状态的 Enter 和 Exit 事件可序列化
     /// </summary>
-    public class StackStateComponent : ScriptableComponent, IStackState
+    [AddComponentMenu("Unity Extension/Stack State Component")]
+    public class StackStateComponent : BaseStackStateComponent
     {
         [SerializeField]
         StackStateEvent _onEnter;
@@ -68,19 +80,19 @@ namespace UnityExtension
         }
 
 
-        public void OnEnter(StackAction stackAction)
+        public override void OnEnter(StackAction stackAction)
         {
             _onEnter?.Invoke(stackAction);
         }
 
 
-        public void OnExit(StackAction stackAction)
+        public override void OnExit(StackAction stackAction)
         {
             _onExit?.Invoke(stackAction);
         }
 
 
-        public void OnUpdate(float deltaTime)
+        public override void OnUpdate(float deltaTime)
         {
             onUpdate?.Invoke(deltaTime);
         }

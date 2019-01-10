@@ -6,6 +6,7 @@ namespace UnityExtension
     /// <summary>
     /// 栈状态机组件, 可作为一般状态机或子状态机使用
     /// </summary>
+    /// <typeparam name="T"> 状态类型 </typeparam>
     public class StackStateMachineComponent<T> : ScriptableComponent, IStackState where T : class, IStackState
     {
         List<T> _states = new List<T>(4);

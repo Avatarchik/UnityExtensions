@@ -4,6 +4,17 @@ using UnityEngine.Events;
 
 namespace UnityExtension
 {
+    /// <summary>
+    /// 栈状态基类
+    /// </summary>
+    public abstract class BaseStackState : IStackState
+    {
+        public abstract void OnEnter(StackAction stackAction);
+        public abstract void OnExit(StackAction stackAction);
+        public abstract void OnUpdate(float deltaTime);
+    }
+
+
     [Serializable]
     public class StackStateEvent : UnityEvent<StackAction>
     {
@@ -14,7 +25,7 @@ namespace UnityExtension
     /// 可序列化栈状态. 状态的 Enter 和 Exit 事件可序列化
     /// </summary>
     [Serializable]
-    public class StackState : IStackState
+    public class StackState : BaseStackState
     {
         [SerializeField]
         StackStateEvent _onEnter;
@@ -75,19 +86,19 @@ namespace UnityExtension
         }
 
 
-        public void OnEnter(StackAction stackAction)
+        public override void OnEnter(StackAction stackAction)
         {
             _onEnter?.Invoke(stackAction);
         }
 
 
-        public void OnExit(StackAction stackAction)
+        public override void OnExit(StackAction stackAction)
         {
             _onExit?.Invoke(stackAction);
         }
 
 
-        public void OnUpdate(float deltaTime)
+        public override void OnUpdate(float deltaTime)
         {
             onUpdate?.Invoke(deltaTime);
         }

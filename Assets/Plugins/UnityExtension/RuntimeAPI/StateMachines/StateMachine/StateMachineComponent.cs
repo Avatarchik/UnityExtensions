@@ -5,6 +5,7 @@ namespace UnityExtension
     /// <summary>
     /// 状态机组件, 可作为一般状态机或子状态机使用
     /// </summary>
+    /// <typeparam name="T"> 状态类型 </typeparam>
     public class StateMachineComponent<T> : ScriptableComponent, IState where T : class, IState
     {
         T _currentState;

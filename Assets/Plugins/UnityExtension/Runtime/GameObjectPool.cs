@@ -48,6 +48,8 @@ namespace UnityExtension
         Dictionary<GameObject, Stack<GameObject>> _objectToStack;
         QuickLinkedList<DelayDespawnObject> _delayDespawnObjects;
 
+        public static GameObjectPool lastAwaked { get; private set; }
+
 
         void AddObjects(Pool pool, int quantity)
         {
@@ -66,6 +68,8 @@ namespace UnityExtension
 
         void Awake()
         {
+            lastAwaked = this;
+
             if (_dontDestroyOnLoad) DontDestroyOnLoad(gameObject);
 
             // Init pools

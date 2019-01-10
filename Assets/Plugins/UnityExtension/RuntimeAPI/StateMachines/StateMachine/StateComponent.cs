@@ -5,9 +5,21 @@ using UnityEngine.Events;
 namespace UnityExtension
 {
     /// <summary>
+    /// 状态组件基类
+    /// </summary>
+    public abstract class BaseStateComponent : ScriptableComponent, IState
+    {
+        public abstract void OnEnter();
+        public abstract void OnExit();
+        public abstract void OnUpdate(float deltaTime);
+    }
+
+
+    /// <summary>
     /// 状态组件. 状态的 Enter 和 Exit 事件可序列化
     /// </summary>
-    public class StateComponent : ScriptableComponent, IState
+    [AddComponentMenu("Unity Extension/State Component")]
+    public class StateComponent : BaseStateComponent
     {
         [SerializeField]
         UnityEvent _onEnter;
@@ -68,19 +80,19 @@ namespace UnityExtension
         }
 
 
-        public void OnEnter()
+        public override void OnEnter()
         {
             _onEnter?.Invoke();
         }
 
 
-        public void OnExit()
+        public override void OnExit()
         {
             _onExit?.Invoke();
         }
 
 
-        public void OnUpdate(float deltaTime)
+        public override void OnUpdate(float deltaTime)
         {
             onUpdate?.Invoke(deltaTime);
         }
