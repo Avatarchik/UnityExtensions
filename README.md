@@ -19,6 +19,9 @@ Unity 通用扩展，包括编辑器、运行时的即用扩展、API 扩展。
       
 关于一些 API 的使用范例位于 UnityExtension/Test 目录，如果你不清楚该怎么用的时候可以参考下。
 
+![Stack State Machine](https://github.com/yuyang9119/UnityExtension/blob/master/Documents/SSM.gif)
+栈状态机示例
+
 欢迎提交 Bug 报告，共同修复、改进这个通用扩展库。我是独立游戏开发者，如果你想和我联系，你可以在这些 QQ 群里找到我：
 
     - Unity 游戏编程：333763528
